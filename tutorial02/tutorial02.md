@@ -43,7 +43,7 @@ static void test_parse_expect_value() {
 }
 ~~~
 
-最后，我希望指出，软件的架构难以用单一标准评分，重构时要考虑平衡各种软件品质。例如上述把 3 个函数合并后，优点是减少重复的代码，维护较容易，但缺点可能是带来性能的少量影响。
+最后，我希望指出，软件的架构难以用单一标准评分，重构时要考虑平衡各种软件品质。例如上述把 3 个函数合并后，优点是减少重复的代码，维护较容易，但缺点可能是带来<font color=#FF0000>性能的少量影响</font>。
 
 # 2. JSON 数字语法
 
@@ -68,7 +68,7 @@ JSON 标准 [ECMA-404](http://www.ecma-international.org/publications/files/ECMA
 
 ![number](images/number.png)
 
-上一单元的 null、false、true 在解析后，我们只需把它们存储为类型。但对于数字，我们要考虑怎么存储解析后的结果。
+上一单元的 null、false、true 在解析后，我们只需把它们存储为类型。但对于数字，我们要考虑怎么<font color=#FF0000>存储解析后的结果</font>。
 
 # 3. 数字表示方式
 
@@ -198,7 +198,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
 
 此外我们谈及，重构与单元测试是互相依赖的软件开发技术，适当地运用可提升软件的品质。之后的单元还会有相关的话题。
 
-1. 重构合并 `lept_parse_null()`、`lept_parse_false()`、`lept_parse_true` 为 `lept_parse_literal()`。
+1. 重构合并 `lept_parse_null()`、`lept_parse_false()`、`lept_parse_true()` 为 `lept_parse_literal()`。
 2. 加入 [维基百科双精度浮点数](https://en.wikipedia.org/wiki/Double-precision_floating-point_format#Double-precision_examples) 的一些边界值至单元测试，如 min subnormal positive double、max double 等。
 3. 去掉 `test_parse_invalid_value()` 和 `test_parse_root_not_singular` 中的 `#if 0 ... #endif`，执行测试，证实测试失败。按 JSON number 的语法在 lept_parse_number() 校验，不符合标准的程况返回 `LEPT_PARSE_INVALID_VALUE`　错误码。
 4. 去掉 `test_parse_number_too_big` 中的 `#if 0 ... #endif`，执行测试，证实测试失败。仔细阅读 [`strtod()`](http://en.cppreference.com/w/c/string/byte/strtof)，看看怎样从返回值得知数值是否过大，以返回 `LEPT_PARSE_NUMBER_TOO_BIG` 错误码。（提示：这里需要 `#include` 额外两个标准库头文件。）
