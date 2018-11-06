@@ -1,3 +1,7 @@
+#ifdef _WINDOWS
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 #include "leptjson.h"
 #include <assert.h>  /* assert() */
 #include <errno.h>   /* errno, ERANGE */
@@ -102,10 +106,103 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
             case '\0':
                 c->top = head;
                 return LEPT_PARSE_MISS_QUOTATION_MARK;
-            default:
-                PUTC(c, ch);
+			case '\\':
+				switch (*p++)
+				{
+					case '\"': PUTC(c, '\"'); break;
+					case '\\':PUTC(c, '\\'); break;
+					case '/':PUTC(c, '/'); break;
+					case 'b':PUTC(c, '\b'); break;
+					case 'f':PUTC(c, '\f'); break;
+					case 'n':PUTC(c, '\n'); break;
+					case 'r':PUTC(c, '\r'); break;
+					case 't':PUTC(c, '\t'); break;
+					default:
+						// I miss this
+						c->top = head;
+						return LEPT_PARSE_INVALID_STRING_ESCAPE;
+				}
+				// this break is important
+				break;
+			default:
+				if ((unsigned char)ch < 0x20) {
+					c->top = head;
+					return LEPT_PARSE_INVALID_STRING_CHAR;
+				}
+				PUTC(c, ch);
         }
     }
+}
+
+static int lept_parse_string_my(lept_context* c, lept_value* v) {
+	size_t head = c->top, len;
+	// the provided method only allocate space when a string judgement is finished
+	size_t normal = 0;
+	const char* p;
+	EXPECT(c, '\"');
+	p = c->json;
+	while (*p != '\"'&&*p != '\\') {
+		//this should befor <0x20
+		if (*p == '\0') {
+			c->top = head;
+			return LEPT_PARSE_MISS_QUOTATION_MARK;
+		}
+		if ((unsigned char)(*p) < 0x20) {
+			c->top = head;
+			return LEPT_PARSE_INVALID_STRING_CHAR;
+		}
+		++p;
+		++normal;
+	}
+	//no matter there is a valid substring, allocate some space, thus when error occurs I can always call free
+	v->u.s.s = (char*)malloc(normal + 1);
+	memcpy(v->u.s.s, c->json, normal);
+	v->u.s.s[normal] = '\0';
+	v->u.s.len = normal;
+	for (;;) {
+		char ch = *p++;
+		switch (ch) {
+		case '\"':
+			len = c->top - head;
+			v->u.s.s=(char*)realloc(v->u.s.s,normal+len+1);
+			memcpy((v->u.s.s) + normal, (const char*)lept_context_pop(c, len), len);
+			v->u.s.s[len + normal ] = '\0';
+			c->json = p;
+			v->u.s.len += len;
+			v->type = LEPT_STRING;
+			return LEPT_PARSE_OK;
+		case '\0':
+			free(v->u.s.s);
+			c->top = head;
+			return LEPT_PARSE_MISS_QUOTATION_MARK;
+		case '\\':
+			switch (*p++)
+			{
+			case '\"': PUTC(c, '\"'); break;
+			case '\\':PUTC(c, '\\'); break;
+			case '/':PUTC(c, '/'); break;
+			case 'b':PUTC(c, '\b'); break;
+			case 'f':PUTC(c, '\f'); break;
+			case 'n':PUTC(c, '\n'); break;
+			case 'r':PUTC(c, '\r'); break;
+			case 't':PUTC(c, '\t'); break;
+			default:
+				// I miss this
+				c->top = head;
+				free(v->u.s.s);
+				return LEPT_PARSE_INVALID_STRING_ESCAPE;
+			}
+			// this is important
+			break;
+		default:
+			if ((unsigned char)ch < 0x20) {
+				c->top = head;
+				free(v->u.s.s);
+				return LEPT_PARSE_INVALID_STRING_CHAR;
+			}
+			PUTC(c, ch);
+		}
+	}
 }
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
@@ -114,7 +211,7 @@ static int lept_parse_value(lept_context* c, lept_value* v) {
         case 'f':  return lept_parse_literal(c, v, "false", LEPT_FALSE);
         case 'n':  return lept_parse_literal(c, v, "null", LEPT_NULL);
         default:   return lept_parse_number(c, v);
-        case '"':  return lept_parse_string(c, v);
+        case '"':  return lept_parse_string_my(c, v);
         case '\0': return LEPT_PARSE_EXPECT_VALUE;
     }
 }
@@ -154,11 +251,21 @@ lept_type lept_get_type(const lept_value* v) {
 
 int lept_get_boolean(const lept_value* v) {
     /* \TODO */
-    return 0;
+	//if (v->type == LEPT_TRUE)
+	//	return 1;
+	//if (v->type == LEPT_FALSE)
+	//	return 0;	    
+	//return -1;
+	assert(v != NULL && (v->type == LEPT_FALSE || v->type == LEPT_TRUE));
+	return v->type == LEPT_TRUE;
 }
 
 void lept_set_boolean(lept_value* v, int b) {
     /* \TODO */
+	////lept_free(&v);
+	//v->type = ((b == 0) ? LEPT_FALSE : LEPT_TRUE);
+	lept_free(v);
+	v->type = b ? LEPT_TRUE : LEPT_FALSE;
 }
 
 double lept_get_number(const lept_value* v) {
@@ -168,6 +275,10 @@ double lept_get_number(const lept_value* v) {
 
 void lept_set_number(lept_value* v, double n) {
     /* \TODO */
+	//lept_free(&v);
+	lept_free(v);
+	v->u.n = n;
+	v->type = LEPT_NUMBER;
 }
 
 const char* lept_get_string(const lept_value* v) {

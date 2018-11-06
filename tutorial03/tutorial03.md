@@ -20,6 +20,8 @@
 
 JSON 的字符串语法和 C 语言很相似，都是以双引号把字符括起来，如 `"Hello"`。但字符串采用了双引号作分隔，那么怎样可以在字符串中插入一个双引号？ 把 `a"b` 写成 `"a"b"` 肯定不行，都不知道那里是字符串的结束了。因此，我们需要引入转义字符（escape character），C 语言和 JSON 都使用 `\`（反斜线）作为转义字符，那么 `"` 在字符串中就表示为 `\"`，`a"b` 的 JSON 字符串则写成 `"a\"b"`。如以下的字符串语法所示，JSON 共支持 9 种转义序列：
 
+注意`“a\"b”`这个字符串在C/C++中就应该是`“\"a\\\"\b\"`。
+
 ~~~
 string = quotation-mark *char quotation-mark
 char = unescaped /
@@ -193,7 +195,7 @@ int lept_parse(lept_value* v, const char* json) {
 }
 ~~~
 
-在释放时，加入了断言确保所有数据都被弹出。
+在释放时，**加入了断言确保所有数据都被弹出**。
 
 然后，我们实现堆栈的压入及弹出操作。和普通的堆栈不一样，我们这个堆栈是以字节储存的。每次可要求压入任意大小的数据，它会返回数据起始的指针（会 C++ 的同学可再参考[1]）：
 
@@ -272,7 +274,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 
 ## 7. 参考
 
-[1] [RapidJSON 代码剖析（一）：混合任意类型的堆栈](https://zhuanlan.zhihu.com/p/20029820)
+[1][RapidJSON 代码剖析（一）：混合任意类型的堆栈](https://zhuanlan.zhihu.com/p/20029820)
 
 # 8. 常见问题
 
