@@ -279,3 +279,11 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 # 8. 常见问题
 
 其他常见问答将会从评论中整理。
+
+# str函数的总结
+
+strcat: 会覆盖dest的`‘\0’`，并添加新的`‘\0’`，要求空间足够。
+
+char *p="ddd" 这里"ddd"存在常量区，无法修改
+
+strcpy 会拷贝`‘\0’`。
