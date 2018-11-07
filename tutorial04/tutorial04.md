@@ -48,7 +48,21 @@ C 标准库没有关于 Unicode 的处理功能（C++11 有），我们会实现
 
 同学可能会发现，4 位的 16 进制数字只能表示 0 至 0xFFFF，但之前我们说 UCS 的码点是从 0 至 0x10FFFF，那怎么能表示多出来的码点？
 
-其实，U+0000 至 U+FFFF 这组 Unicode 字符称为基本多文种平面（basic multilingual plane, BMP），还有另外 16 个平面。那么 BMP 以外的字符，JSON 会使用代理对（surrogate pair）表示 `\uXXXX\uYYYY`。在 BMP 中，保留了 2048 个代理码点。如果第一个码点是 U+D800 至 U+DBFF，我们便知道它的代码对的高代理项（high surrogate），之后应该伴随一个 U+DC00 至 U+DFFF 的低代理项（low surrogate）。然后，我们用下列公式把代理对 (H, L) 变换成真实的码点：
+其实，U+0000 至 U+FFFF 这组 Unicode 字符称为基本多文种平面（basic multilingual plane, BMP），还有另外 16 个平面。
+
+补充：
+|     平面     |     始末字符值      |            中文名称            |                   英文名称                   |
+| :----------: | :-----------------: | :----------------------------: | :------------------------------------------: |
+|   0号平面    |   U+0000 - U+FFFF   |         基本多文种平面         |      Basic Multilingual Plane，简称BMP       |
+|   1号平面    |  U+10000 - U+1FFFF  |         多文种补充平面         |  Supplementary Multilingual Plane，简称SMP   |
+|   2号平面    |  U+20000 - U+2FFFF  |        表意文字补充平面        |   Supplementary Ideographic Plane，简称SIP   |
+|   3号平面    |  U+30000 - U+3FFFF  | 表意文字第三平面（未正式使用） |     Tertiary Ideographic Plane，简称TIP      |
+| 4号-13号平面 |  U+40000 - U+DFFFF  |          （尚未使用）          |                                              |
+|   14号平面   |  U+E0000 - U+EFFFF  |        特别用途补充平面        | Supplementary Special-purpose Plane，简称SSP |
+|   15号平面   |  U+F0000 - U+FFFFF  |  保留作为私人使用区（A区）[2]  |       Private Use   Area-A，简称PUA-A        |
+|   16号平面   | U+100000 - U+10FFFF |   保留作为私人使用区（B区）    |        Private Use Area-B，简称PUA-B         |
+
+那么 BMP 以外的字符，JSON 会使用代理对（surrogate pair）表示 `\uXXXX\uYYYY`。在 BMP 中，保留了 2048 个代理码点（U+D800 至 U+DBFF为1024个， U+DC00 至 U+DFFF为1024个）。如果第一个码点是 U+D800 至 U+DBFF，我们便知道它的代码对的高代理项（high surrogate），之后应该伴随一个 U+DC00 至 U+DFFF 的低代理项（low surrogate）。然后，我们用下列公式把代理对 (H, L) 变换成真实的码点：
 
 ~~~
 codepoint = 0x10000 + (H − 0xD800) × 0x400 + (L − 0xDC00)
