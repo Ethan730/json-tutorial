@@ -64,7 +64,7 @@ JSON（JavaScript Object Notation）是一个用于数据交换的文本格式�
 2. 提供接口访问该数据结构（access）。
 3. 把数据结构转换成 JSON 文本（stringify）。
 
-![requirement](C:/Users/%E7%8E%8B%E8%AF%91%E9%94%8C/Desktop/json-tutorial-master/tutorial01/images/requirement.png)
+![requirement](images/requirement.png)
 
 我们会逐步实现这些需求。在本单元中，我们只实现最简单的 null 和 boolean 解析。
 
@@ -84,7 +84,7 @@ JSON（JavaScript Object Notation）是一个用于数据交换的文本格式�
 
 在 Windows 下，下载安装 CMake 后，可以使用其 cmake-gui 程序：
 
-![cmake-gui](C:/Users/%E7%8E%8B%E8%AF%91%E9%94%8C/Desktop/json-tutorial-master/tutorial01/images/cmake-gui.png)
+![cmake-gui](images/cmake-gui.png)
 
 先在 "Where is the source code" 选择 json-tutorial/tutorial01，再在 "Where to build the binary" 键入上一个目录加上 /build。
 

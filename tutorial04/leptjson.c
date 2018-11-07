@@ -171,6 +171,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                         if (!(p = lept_parse_hex4(p, &u)))
                             STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_HEX);
                         /* \TODO surrogate handling */
+                        // write a wrong beginning of the surrogate pair
 						if (u >= 0xD800 && u <= 0xDBFF) {
 							if (*p++ != '\\')
 								STRING_ERROR(LEPT_PARSE_INVALID_UNICODE_SURROGATE);
