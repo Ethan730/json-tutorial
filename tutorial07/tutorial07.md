@@ -153,3 +153,18 @@ leptjson 重复利用了 `lept_context` 中的数据结构作为输出缓冲，�
 3. 在你的 `lept_stringify_string()` 是否使用了多次 `PUTC()`？如果是，它每次输出一个字符时，都要检测缓冲区是否有足够空间（不够时需扩展）。能否优化这部分的性能？这种优化有什么代价么？
 
 如果你遇到问题，有不理解的地方，或是有建议，都欢迎在评论或 [issue](https://github.com/miloyip/json-tutorial/issues) 中提出，让所有人一起讨论。
+
+## 6.Ethan
+
+1. 为什么要把0x20一下的转为unicode:
+
+   因为小于20的是不合规定的字符（见tutorial03中关于string的规定）
+
+2. 其他的字符是直接PUTC的
+
+   按我的理解，没有把utf-8再转为标准的unicode码。
+
+3. 为什么不处理‘/’
+
+   json中‘/’不是必须进行转义的。[JSON String Escape/Unexcape](https://www.freeformatter.com/json-escape.html)
+
