@@ -475,6 +475,7 @@ static void test_copy() {
     lept_value v1, v2;
     lept_init(&v1);
     lept_parse(&v1, "{\"t\":true,\"f\":false,\"n\":null,\"d\":1.5,\"a\":[1,2,3]}");
+	//lept_parse(&v1, "{\"t\":true,\"f\":false,\"n\":null,\"d\":1.5}");
     lept_init(&v2);
     lept_copy(&v2, &v1);
     EXPECT_TRUE(lept_is_equal(&v2, &v1));
@@ -591,7 +592,7 @@ static void test_access_array() {
     for (i = 0; i < 6; i++)
         EXPECT_EQ_DOUBLE((double)i + 2, lept_get_number(lept_get_array_element(&a, i)));
 
-#if 0
+#if 1
     for (i = 0; i < 2; i++) {
         lept_init(&e);
         lept_set_number(&e, i);
@@ -626,7 +627,7 @@ static void test_access_array() {
 }
 
 static void test_access_object() {
-#if 0
+#if 1
     lept_value o, v, *pv;
     size_t i, j, index;
 
@@ -643,8 +644,10 @@ static void test_access_object() {
             lept_set_number(&v, i);
             lept_move(lept_set_object_value(&o, key, 1), &v);
             lept_free(&v);
+			lept_member* tmp = &o.u.o.m[i];
         }
         EXPECT_EQ_SIZE_T(10, lept_get_object_size(&o));
+		
         for (i = 0; i < 10; i++) {
             char key[] = "a";
             key[0] += i;
